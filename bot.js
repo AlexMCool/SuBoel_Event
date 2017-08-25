@@ -6,7 +6,7 @@ const token = config.token;
 
 function generateHex() {
 	return "#" + Math.floor(Math.random()*16777215).toString(16);
-}
+};
 
 var fortunes = [
 	"yes",
@@ -18,7 +18,7 @@ var fortunes = [
 var bot = new Discord.Client();
 
 bot.on("ready", function() {
-	console.log("Ready");
+	console.log("Logged in as " + bot.user.tag);
 });
 
 bot.on("guildMemberAdd", function(member) {
@@ -86,7 +86,7 @@ bot.on("message", function(message) {
 			});
 			break;
 		case "team":
-			if (args[1] === "join" && typeof args[2] !== "undefined" && args[2] !== null && message.member.guild.roles.find("name", args[2].toLowerCase()) === null ) {
+			if (args[1].toLowerCase() === "join" && typeof args[2] !== "undefined" && args[2] !== null && message.member.guild.roles.find("name", args[2].toLowerCase()) === null ) {
 				message.member.guild.createRole({
 					name: args[2].toLowerCase(),
 					color: generateHex(),
@@ -101,12 +101,12 @@ bot.on("message", function(message) {
 				message.channel.send("You joined team `" + args[2].toLowerCase() + "`");
 				break;
 			};
-			if (args[1] === "join" && typeof args[2] !== "undefined" && args[2] !== null && message.member.guild.roles.find("name", args[2].toLowerCase()) !== null ) {
+			if (args[1].toLowerCase() === "join" && typeof args[2] !== "undefined" && args[2] !== null && message.member.guild.roles.find("name", args[2].toLowerCase()) !== null ) {
 				message.channel.send("bestaat al");
 				message.member.addRole(message.member.guild.roles.find("name", args[2].toLowerCase()));
 				break;
 			}
-			if (args[1] === "leave" && typeof args[2] !== "undefined" && args[2] !== null) {
+			if (args[1].toLowerCase() === "leave" && typeof args[2] !== "undefined" && args[2] !== null) {
 				if (message.member.guild.roles.find("name", args[2].toLowerCase()).members.size === 1) {
 					message.member.guild.roles.find("name", args[2].toLowerCase()).delete();
 					message.channel.send("Role deleted");
