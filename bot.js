@@ -86,7 +86,7 @@ bot.on("message", function(message) {
 			});
 			break;
 		case "team":
-			if (args[1].toLowerCase() === "join" && typeof args[2] !== "undefined" && args[2] !== null && message.member.guild.roles.find("name", args[2].toLowerCase()) === null ) {
+			if (args[1].toLowerCase() === "join" && typeof args[2].toLowerCase() !== "undefined" && args[2].toLowerCase() !== null && message.member.guild.roles.find("name", args[2].toLowerCase()) === null ) {
 				message.member.guild.createRole({
 					name: args[2].toLowerCase(),
 					color: generateHex(),
@@ -101,12 +101,12 @@ bot.on("message", function(message) {
 				message.channel.send("You joined team `" + args[2].toLowerCase() + "`");
 				break;
 			};
-			if (args[1].toLowerCase() === "join" && typeof args[2] !== "undefined" && args[2] !== null && message.member.guild.roles.find("name", args[2].toLowerCase()) !== null ) {
+			if (args[1].toLowerCase() === "join" && typeof args[2].toLowerCase() !== "undefined" && args[2].toLowerCase() !== null && message.member.guild.roles.find("name", args[2].toLowerCase()) !== null ) {
 				message.channel.send("bestaat al");
 				message.member.addRole(message.member.guild.roles.find("name", args[2].toLowerCase()));
 				break;
 			}
-			if (args[1].toLowerCase() === "leave" && typeof args[2] !== "undefined" && args[2] !== null) {
+			if (args[1].toLowerCase() === "leave" && typeof args[2].toLowerCase() !== "undefined" && args[2].toLowerCase() !== null) {
 				if (message.member.guild.roles.find("name", args[2].toLowerCase()).members.size === 1) {
 					message.member.guild.roles.find("name", args[2].toLowerCase()).delete();
 					message.channel.send("Role deleted");
