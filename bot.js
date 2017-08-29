@@ -242,7 +242,8 @@ bot.on("message", function(message) {
 						joinTeam(message, message.member.guild.roles.find("name", teamName));
 					}
 					else {
-						message.channel.send("full");
+						message.channel.send("TEAM IS FULL");
+						log(message.author, "Ran Command \"team join\"", null, message.channel, ["Error", "Team Is Full"]);
 						break;
 					};
 					break;
