@@ -4,19 +4,12 @@ const config = require("./config.json");
 const prefix = config.prefix;
 const token = config.token;
 const log_channel = config.log_channel;
+const team_max = config.team_max
 
 const userdata = require("./userdata.json");
 const fs = require("fs");
 
-function loadUserdata() {
-	var userdata = JSON.parse(fs.readFileSync("./userdata.json", "utf8", loadDone()));
-	console.log("load");
-};
-
-function loadDone() {
-	console.log(userdata[180975824273408000].team)
-	console.log("done");
-};
+const bot = new Discord.Client();
 
 function generateHex() {
 	return "#" + Math.floor(Math.random()*16777215).toString(16);
@@ -26,6 +19,15 @@ function saveJSON(filePath, fileData) {
 	fs.writeFile(filePath, JSON.stringify(fileData, null, 2), (err) => {
 		if (err) console.error(err);
 	});
+};
+
+function joinTeam(message, team) {
+	message.member.addRole(team);
+	var userdata = JSON.parse(fs.readFileSync("./userdata.json", "utf8"));
+	userdata[message.author.id].team = team.id;
+	saveJSON("./userdata.json", userdata);
+	message.channel.send("<@" + message.author.id + "> joined team <@&" + team.id + ">");
+	log(message.author, "Ran Command \"team join\"", null, message.channel, ["Team Tag", "<@&" + team.id + ">"], ["Team Name", team.name], ["Team ID", team.id]);
 };
 
 function log(author, title, description, channel, field1, field2, field3, field4, field5) {
@@ -81,8 +83,6 @@ var fortunes = [
 	"maybe",
 	"fuck off"
 ];
-
-var bot = new Discord.Client();
 
 bot.on("ready", function() {
 	log(bot.user, "Logged In");
@@ -213,8 +213,9 @@ bot.on("message", function(message) {
 			break;
 
 		case "team":
-			// team join
-			if (args[1] === "join") {
+		if (args[1]) {
+			switch (args[1].toLowerCase()) {
+				case "join":
 				// team is not specified
 				if (typeof args[2] === "undefined") {
 					message.channel.send("SPECIFY TEAM");
@@ -232,33 +233,25 @@ bot.on("message", function(message) {
 							mentionable: true,
 							name: teamName,
 							permissions: []
-						}).then(function(role) {
-							message.member.addRole(role);
-							var team = message.member.guild.roles.find("name", teamName);
-							var userdata = JSON.parse(fs.readFileSync("./userdata.json", "utf8"));
-							userdata[message.author.id].team = team.id;
-							saveJSON("./userdata.json", userdata);
-							message.channel.send("<@" + message.author.id + "> joined team <@&" + team.id + ">");
-							log(message.author, "Ran Command \"team join\"", null, message.channel, ["Team Tag", "<@&" + team.id + ">"], ["Team Name", team.name], ["Team ID", team.id]);
+						}).then(function(test) {
+							joinTeam(message, message.member.guild.roles.find("name", teamName))
 						});
-						break;
 					}
-					// team does exist
+					// team does exist and isn't full
+					else if (message.member.guild.roles.find("name", teamName) !== null && message.member.guild.roles.find("name", teamName).members.size < team_max) {
+						joinTeam(message, message.member.guild.roles.find("name", teamName));
+					}
 					else {
-						var team = message.member.guild.roles.find("name", teamName);
-						message.member.addRole(team);
-						var userdata = JSON.parse(fs.readFileSync("./userdata.json", "utf8"));
-						userdata[message.author.id].team = team.id;
-						saveJSON("./userdata.json", userdata);
-						message.channel.send("<@" + message.author.id + "> joined team <@&" + team.id + ">");
-						log(message.author, "Ran Command \"team join\"", null, message.channel, ["Team Tag", "<@&" + team.id + ">"], ["Team Name", team.name], ["Team ID", team.id]);
+						message.channel.send("full");
+						break;
 					};
 					break;
 				};
-			}
-			// team leave
-			if (args[1] === "leave") {
+				break;
+
+				case "leave":
 				var userdata = JSON.parse(fs.readFileSync("./userdata.json", "utf8"));
+				// last member is leaving
 				if (userdata[message.author.id].team > 0) {
 					var team = message.member.guild.roles.find("id", userdata[message.author.id].team);
 					// last member is leaving
@@ -287,13 +280,20 @@ bot.on("message", function(message) {
 					message.channel.send("YOU'RE NOT IN A TEAM");
 					log(message.author, "Ran Command \"team leave\"", null, message.channel, ["Error", "No Team To Leave"])
 				};
-			}
-			else {
-				message.channel.send("USE LIKE TIS");
-				log(message.author, "Ran Command \"team\"", null, message.channel, ["Error", "Invalid Subcommand"])
+				break;
+
+				default:
+				message.channel.send("USE LIKE THIS");
+				log(message.author, "Ran Command\"team leave\"", null, message.channel, ["Error", "Invalid Subcommand"]);
 				break;
 			};
+		}
+		else {
+			message.channel.send("USE LIKE THIS");
+			log(message.author, "Ran Command\"team leave\"", null, message.channel, ["Error", "Invalid Subcommand"]);
 			break;
+		};
+		break;
 
 		// invalid command
 		default:
