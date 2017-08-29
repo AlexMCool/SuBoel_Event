@@ -30,14 +30,21 @@ function saveJSON(filePath, fileData) {
 
 function log(author, title, description, channel, field1, field2, field3, field4, field5) {
 	var date = new Date();
-	var logMessage = "[" + date.toLocaleTimeString("en-GB", {hour12: false}) + "] " + author.tag + " > " + title.toLowerCase();
+	var minutes = date.getMinutes().toString().length == 1 ? '0'+ date.getMinutes() : date.getMinutes();
+	var hours = date.getHours().toString().length == 1 ? '0'+ date.getMinutes() : date.getMinutes();
+	var days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+	var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+	var timeString = date.toLocaleTimeString("en-GB", {hour12: false});
+	var dateString = days[date.getDay()] + " " + date.getDate() + " " + months[date.getMonth()];
+
+	var logMessage = "[" + dateString + " " + timeString + "] " + author.tag + " > " + title.toLowerCase();
 	var embed = new Discord.RichEmbed()
 		.setColor(0xFFFF00)
-		.setFooter(author.tag, author.avatarURL)
-		.setTimestamp(date)
+		.setFooter(author.username + " on " + dateString + " at " + timeString, author.avatarURL)
 		.setTitle(title)
 	if (channel) {
-		embed.setFooter(author.tag + " in #" + channel.name, author.avatarURL);
+		embed.setFooter(author.username + " in #" + channel.name + " on " + dateString + " at " + timeString, author.avatarURL);
 		logMessage += " in #" + channel.name;
 	};
 	if (description) {
@@ -173,12 +180,36 @@ bot.on("message", function(message) {
 
 		// command test
 		case "test":
-			var userdata = JSON.parse(fs.readFileSync("./userdata.json", "utf8"));
-			message.channel.send(userdata[message.author.id].team);
-			userdata[message.author.id].team = message.member.guild.roles.find("name", team).id;
-			fs.writeFile("./userdata.json", JSON.stringify(userdata), (err) => {
-				if (err) console.error(err)
-			});
+			message.channel.send({embed: {
+			  color: 3447003,
+			  author: {
+			    name: bot.user.tag,
+			    icon_url: bot.user.avatarURL,
+					url: bot.user.avatarURL
+			  },
+			  title: 'This is an embed',
+			  url: 'http://google.com',
+			  description: 'This is a test embed to showcase what they look like and what they can do.',
+			  fields: [
+			    {
+			      name: 'Fields',
+			      value: 'They can have different fields with small headlines.'
+			    },
+			    {
+			      name: 'Masked links',
+			      value: 'You can put [masked links](http://google.com) inside of rich embeds.'
+			    },
+			    {
+			      name: 'Markdown',
+			      value: 'You can put all the *usual* **__Markdown__** inside of them.'
+			    }
+			  ],
+			  timestamp: new Date(),
+			  footer: {
+			    icon_url: bot.user.avatarURL,
+			    text: '© Example'
+			  }
+			}});
 			break;
 
 		case "team":
